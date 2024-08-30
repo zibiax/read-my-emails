@@ -1,27 +1,39 @@
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.errors import HttpError
+import time
+
 
 def mark_unread_emails_as_read(service, user_id='me'):
     all_messages = []
-    # Fetch only unread messages by specifying labelIds as ['UNREAD']
     request = service.users().messages().list(userId=user_id, labelIds=['UNREAD'])
 
     print("Starting to fetch unread messages...")
 
     while request is not None:
-        response = request.execute()
-        if 'messages' in response:
-            all_messages.extend(response['messages'])
-            print(f"Fetched {len(response['messages'])} unread messages...")
-            for message in response['messages']:
-                # Mark the message as read by removing the 'UNREAD' label
-                service.users().messages().modify(userId=user_id, id=message['id'], body={'removeLabelIds': ['UNREAD']}).execute()
-                print(f"Marked message {message['id']} as read.")
+        try:
+            response = request.execute()
+            if 'messages' in response:
+                all_messages.extend(response['messages'])
+                print(f"Fetched {len(response['messages'])} unread messages...")
+                for message in response['messages']:
+                    try:
+                        # Attempt to mark the message as read by removing the 'UNREAD' label
+                        service.users().messages().modify(userId=user_id, id=message['id'], body={'removeLabelIds': ['UNREAD']}).execute()
+                        print(f"Marked message {message['id']} as read.")
+                    except HttpError as error:
+                        if error.resp.status == 400:
+                            print(f"Skipping message {message['id']} due to precondition failure.")
+                        else:
+                            raise  # Re-raise the exception if it's a different error
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            time.sleep(1)  # Sleep briefly before retrying
 
         # Get the next page of unread messages
         request = service.users().messages().list_next(previous_request=request, previous_response=response)
 
-    print("Completed processing all unread messages.")
+    print(f"Completed processing all unread messages. Marked {len(all_messages)} as read")
     return all_messages
 
 def main():
