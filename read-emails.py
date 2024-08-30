@@ -1,43 +1,40 @@
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow, Request
 from googleapiclient.discovery import build
-import os
+from google_auth_oauthlib.flow import InstalledAppFlow
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+def mark_unread_emails_as_read(service, user_id='me'):
+    all_messages = []
+    # Fetch only unread messages by specifying labelIds as ['UNREAD']
+    request = service.users().messages().list(userId=user_id, labelIds=['UNREAD'])
+
+    print("Starting to fetch unread messages...")
+
+    while request is not None:
+        response = request.execute()
+        if 'messages' in response:
+            all_messages.extend(response['messages'])
+            print(f"Fetched {len(response['messages'])} unread messages...")
+            for message in response['messages']:
+                # Mark the message as read by removing the 'UNREAD' label
+                service.users().messages().modify(userId=user_id, id=message['id'], body={'removeLabelIds': ['UNREAD']}).execute()
+                print(f"Marked message {message['id']} as read.")
+
+        # Get the next page of unread messages
+        request = service.users().messages().list_next(previous_request=request, previous_response=response)
+
+    print("Completed processing all unread messages.")
+    return all_messages
 
 def main():
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+    SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
+    CLIENT_SECRETS_FILE = 'credentials.json'
 
-    service = build('gmail', 'v1', credentials=creds)
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    credentials = flow.run_local_server(port=0)
+    service = build('gmail', 'v1', credentials=credentials)
 
-    # Call the Gmail API
-    results = service.users().messages().list(userId='me').execute()
-    messages = results.get('messages', [])
-
-    if not messages:
-        print('No messages found.')
-    else:
-        print('Message IDs:')
-        for message in messages:
-            msg = service.users().messages().get(userId='me', id=message['id']).execute()
-            print(msg['snippet'])  # Print email snippet
+    # Fetch and mark all unread emails as read
+    emails = mark_unread_emails_as_read(service)
+    print(f'Total unread emails processed: {len(emails)}')
 
 if __name__ == '__main__':
     main()
