@@ -25,15 +25,14 @@ def mark_unread_emails_as_read(service, user_id='me'):
                         if error.resp.status == 400:
                             print(f"Skipping message {message['id']} due to precondition failure.")
                         else:
-                            raise  # Re-raise the exception if it's a different error
+                            raise # raise for some other error
         except HttpError as error:
             print(f"An error occurred: {error}")
-            time.sleep(1)  # Sleep briefly before retrying
+            time.sleep(1)  # Sleep 1 sec, then continue
 
         # Get the next page of unread messages
         request = service.users().messages().list_next(previous_request=request, previous_response=response)
 
-    print(f"Completed processing all unread messages. Marked {len(all_messages)} as read")
     return all_messages
 
 def main():
