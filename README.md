@@ -6,13 +6,8 @@ and name the json file credentials.json.
 
 How to install and run:
 
-```zsh
-conda create --read-my-emails python=3.12```
-```zsh
-conda activate read-my-emails```
-```zsh
-conda install pip```
-```zsh
-pip -r install requirements.txt```
-```zsh
-python read-emails.py```
+```conda create --read-my-emails python=3.12```
+```conda activate read-my-emails```
+```conda install pip```
+```pip -r install requirements.txt```
+```python read-emails.py```

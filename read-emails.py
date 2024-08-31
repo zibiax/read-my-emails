@@ -2,7 +2,6 @@ import asyncio
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import aiohttp
 from aiohttp import ClientSession
 
 # Define the async function to mark an email as read
