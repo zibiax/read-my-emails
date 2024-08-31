@@ -1,17 +1,32 @@
 # Read all my emails
 
-I have to many unread old emails. So I made this script to do it for me instead.
-You need a json file from your google account with tokens from gmail api with gmail modify scope,
-and name the json file credentials.json.
+I have too many unread old emails. So I made this script to do it for me instead.
+You need a json file from your Google account with tokens from the Gmail API with Gmail modify scope,
+and name the json file `credentials.json`.
 
-How to install and run:
+## How to install and run:
 
-```conda create --read-my-emails python=3.12```
+Create a Conda environment:
+```bash
+conda create --name read-my-emails python=3.12
+```
 
-```conda activate read-my-emails```
+Activate the environment:
+```bash
+conda activate read-my-emails
+```
 
-```conda install pip```
+Install pip in the environment:
+```bash
+conda install pip
+```
 
-```pip -r install requirements.txt```
+Install required packages:
+```bash
+pip install -r requirements.txt
+```
 
-```python read-emails.py```
+Run the script:
+```bash
+python read-emails.py
+```
