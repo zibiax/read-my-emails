@@ -1,0 +1,10 @@
+aiohttp==3.10.5
+google-api-core==2.19.2
+google-api-python-client==2.143.0
+google-auth==2.34.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1
+googleapis-common-protos==1.65.0
+httplib2==0.22.0
+requests==2.32.3
+requests-oauthlib==2.0.0
